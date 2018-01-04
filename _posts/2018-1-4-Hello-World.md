@@ -14,3 +14,5 @@ In the near future, I hope to cover the following topics:
 * Wikigraphs, a coding project I'm currently working on
 * Summary of books I read in 2017
 * A short story and thoughts about it
+
+Thanks for stopping by! :)
