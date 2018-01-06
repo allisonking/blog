@@ -52,3 +52,12 @@ In order to accommodate data changes, I added a database and server side code (i
 With the database in place, all user modifications are now saved and logged.
 
 ## Concluding Thoughts
+Wikigraphs is a proof of concept of how user discussion/discourse may lead to more representative graphs. There are still questions outstanding as well as improvements that could be made:
+* Displaying user activity, i.e. when authors are added or removed, to the side, or on a separate page, may be useful, if only to remind readers that the data should not be trusted without second thought
+* Adding a database and server side code is a non-trivial task. Could a tool be developed to make this all easier? Hosting the data in a cloud environment meant for this kind of data manipulation, for example?
+* The example model trusts the NYT API as a source to reliably return the reviews for a given author. If there were a bug in the API, or if the database somehow missed out on some sources, this would not be reliable, and perhaps this part, too, could also be editable by users
+* What about just using Wikipedia for data? Certainly easier than setting up another framework, but I see a difference between a link that says 'data from ___ Wikipedia page', where a user might not think to go edit that page, and actually being prompted by the graph itself to edit the underlying data
+
+Finally, an acknowledgment-- a lot of this line of thinking was inspired by the article [*What Would Feminist Data Visualization Look Like?*](https://civic.mit.edu/feminist-data-visualization) by Catherine D'Ignazio, so super thanks to her work. 
+
+Thanks for reading! I still need to actually go out and make this project hosted somewhere, so stay tuned! In the meantime, [here's the repository](https://github.com/allisonking/wiki-graphs/tree/readme). 
