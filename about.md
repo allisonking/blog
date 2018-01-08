@@ -4,7 +4,6 @@ title: About
 permalink: /about/
 published: true
 ---
-## About Me
 Thanks for checking out my blog! I am an engineer at MIT Lincoln Laboratory by day and a writer by night. Sometimes I dabble in data visualizations too. 
 
 ### This site
