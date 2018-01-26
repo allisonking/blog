@@ -43,7 +43,7 @@ There's some additional functionality as well-- you can hover on points to see t
 
 ### Next, user input
 The pipeline so far looks like this:
-![first pipeline](https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/pipeline_2.png)
+![first pipeline](https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/pipeline_1.png)
 
 What we want though, is something more like this:
 ![second pipelines](https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/pipeline_2.png)
