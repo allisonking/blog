@@ -12,3 +12,17 @@ It turns out a good way to show updated data is through websockets. Before webso
 
 So how do you make visualizations in D3 that utilize websockets in order to get real time updates? I put together this tutorial to show an example of how it can be done. Onwards!
 
+# The Tutorial
+Time to have some fun! We are going to use [GDAX's websocket feed](https://docs.gdax.com/#websocket-feed) as our source data, both because it was one of the few public websocket APIs I could find, and because cryptocurrency seems to be all the rage these days. GDAX is a a website that allows trading of cryptocurrency. Now before you put your trust in me that we'll be having fun and making a cool real time visualization, you probably want to see an end result. [Check it out!](https://bl.ocks.org/allisonking/83e870c24f5031e9a6abe3719bf66032)
+
+What's going on here?
+* Live data from the GDAX website of Ethereum transactions 
+* Visualized with D3.js, featuring:
+  * Scrolling to pop off older data as we get newer data
+  * Automatic axes adjustment as data comes in
+  
+
+
+## Prerequisites
+* A web browser capable of supporting web sockets. Check out [this site](https://www.websocket.org/echo.html) which will tell you whether or not your browser supports websockets!
+* 
