@@ -21,8 +21,50 @@ What's going on here?
   * Scrolling to pop off older data as we get newer data
   * Automatic axes adjustment as data comes in
   
-
-
 ## Prerequisites
 * A web browser capable of supporting web sockets. Check out [this site](https://www.websocket.org/echo.html) which will tell you whether or not your browser supports websockets!
-* 
+* A local web server-- I use `http-server`. See [the D3 wiki](https://github.com/d3/d3/wiki#local-development) for how to use/install.
+* A text editor
+
+## Getting Started
+Alright, we are ready to go! There will be two examples we will rely heavily on to get started:
+* Mike Bostock's [Spline Transition](https://bl.ocks.org/mbostock/1642989) block
+* Websocket.org's [Echo example](https://www.websocket.org/echo.html)
+
+Spline Transition is part of a series of blocks on real time visualization that can be found [here](https://bost.ocks.org/mike/path/). The example uses randomly generated numbers, constrained to a certain range (a normal curve centered on 0 with standard deviation of 0.2) that get added every 'tick'. Because the randomly generated numbers are constrained in this example, there's no need to update axes. But we'll be using pretty unpredictable data (who knows what's going on in that crazy cryptocurrency market?) so we'll need an adjusting axis, and since we aren't just randomly generating data and are pulling it from a real source, we'll use websockets to get the data in real time. 
+
+The echo example is a good reference for how to connect to a websocket, send and receive messages, and close a websocket. We'll use this as a reference.
+
+Alright! Go ahead and download Spline Transition's `index.html`. The easiest way to download this is probably to either copy and paste from the block, or go to [the gist](https://gist.github.com/mbostock/1642989) and download the raw `index.html`.
+
+## Understanding the code
+We'll leave the CSS and HTML as is, and focus only on the JavaScript portions, the portions in between the `<script> </script>` tags. In this section, we will simply go over the lines of code, what they do, and I'll say a bit how we will change them, though we will save the action of actually changing the lines for the next section.
+
+Let's start with the first three lines of JavaScript.
+```javascript
+var n = 40,
+    random = d3.randomNormal(0, .2),
+    data = d3.range(n).map(random);
+```
+
+`n` is the number of data points that will be shown on the x axis-- with new data coming in, we need to pop off the older values whenever we exceed `n`. We'll keep `n` at 40 in this tutorial, but feel free to adjust as you want. We won't be using `random`, but this is a function that generates a random number that would fit a normal distribution of (median, standard deviation). Finally, we have our ever important data! This line says essentially says 'give me `n` random values', where `n` is 40 in our case, and `random` is the function we just defined in the line above. We won't start with any data and will instead just start with an empty array since all of our data will be from websockets.
+
+```javascript
+var svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 20, left: 40},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+```
+This is standard SVG and D3 code to get the SVG object from the HTML, to get the dimensions, and to make a group that we can append all of our SVG elements to.
+
+```javascript
+var x = d3.scaleLinear()
+    .domain([1, n - 2])
+    .range([0, width]);
+
+var y = d3.scaleLinear()
+    .domain([-1, 1])
+    .range([height, 0]);
+```
+Here, the range and domain of our x and y scales are set. The x scale is straightforward and we will not be changing it.
