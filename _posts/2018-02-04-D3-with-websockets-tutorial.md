@@ -67,4 +67,37 @@ var y = d3.scaleLinear()
     .domain([-1, 1])
     .range([height, 0]);
 ```
-Here, the range and domain of our x and y scales are set. The x scale is straightforward and we will not be changing it.
+Here, the range and domain of our x and y scales are set. The x scale is straightforward and we will not be changing it-- we want the range to be the width of our SVG, and we want the domain to be the number of data points that we will have. Minus two. I believe that's to keep the data looking like it is moving while it comes in. 
+
+The range for our y scale will be the same (the height of our SVG), but our domain will not be -1 to 1, because if it were, I think a lot of people would be very worried about their cryptocurrency portfolios! We won't know what this domain will until we start getting data in.
+
+```javascript
+var line = d3.line()
+    .curve(d3.curveBasis)
+    .x(function(d, i) { return x(i); })
+    .y(function(d, i) { return y(d); });
+```
+
+This is another function, called `line` that will draw a D3 line based on x and y values. We won't be changing this.
+
+```javascript
+g.append("defs").append("clipPath")
+    .attr("id", "clip")
+  .append("rect")
+    .attr("width", width)
+    .attr("height", height);
+```
+
+Ah, a clip path! This says that anything outside of this rectangle will be clipped off and won't be shown. Why do we need this? Because we have a line which will be moving to x values that aren't in the chart, and we want everything to look like it's staying within the axes. Clip paths can be used for implementing zooming as well, where if you don't have them, you end up with data points outside your x and y axes!
+
+```javascript
+g.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + y(0) + ")")
+    .call(d3.axisBottom(x));
+g.append("g")
+    .attr("class", "axis axis--y")
+    .call(d3.axisLeft(y));
+```
+
+Here, we make the actual axis SVG element for both the x and y axes. D3 has some magic for axes. In this case, all we need to do is pass in the scales we defined earlier. `d3.axisBottom()` puts the axis at the bottom of the scale, and `d3.axisLeft()` puts it at-- you guessed it!-- the leftmost position of the scale. This example transforms the x axis up to the middle so that we get more of a T shaped graph. I like the x axis at the very bottom for the graph that we will be making, but it's up to you how to show off your data.
