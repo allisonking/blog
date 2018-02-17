@@ -38,7 +38,7 @@ The echo example is a good reference for how to connect to a websocket, send and
 Alright! Go ahead and download Spline Transition's `index.html`. The easiest way to download this is probably to either copy and paste from the block, or go to [the gist](https://gist.github.com/mbostock/1642989) and download the raw `index.html`.
 
 ## Understanding the code
-We'll leave the CSS and HTML as is, and focus only on the JavaScript portions, the portions in between the `<script> </script>` tags. In this section, we will simply go over the lines of code, what they do, and I'll say a bit how we will change them, though we will save the action of actually changing the lines for the next section.
+In this section, we will simply go over the lines of code, what they do, and I'll say a bit how we will change them, though we will save the action of actually changing the lines for the next section. We'll leave the CSS and HTML as is, and focus only on the JavaScript portions, the portions in between the `<script> </script>` tags. 
 
 Let's start with the first three lines of JavaScript.
 ```javascript
@@ -101,3 +101,103 @@ g.append("g")
 ```
 
 Here, we make the actual axis SVG element for both the x and y axes. D3 has some magic for axes. In this case, all we need to do is pass in the scales we defined earlier. `d3.axisBottom()` puts the axis at the bottom of the scale, and `d3.axisLeft()` puts it at-- you guessed it!-- the leftmost position of the scale. This example transforms the x axis up to the middle so that we get more of a T shaped graph. I like the x axis at the very bottom for the graph that we will be making, but it's up to you how to show off your data.
+
+```javascript
+g.append("g")
+    .attr("clip-path", "url(#clip)")
+  .append("path")
+    .datum(data)
+    .attr("class", "line")
+  .transition()
+    .duration(500)
+    .ease(d3.easeLinear)
+    .on("start", tick);
+```
+These few lines of code are doing a good amount of work. The first `append` appends the clip path, which we defined earlier (the one we have an id of 'clip' to). The next `append` adds a path which uses that line function we defined earlier to calculate the values for the path. And finally, we have a transition which calls the `tick` function. This is responsible for the animation that we see. So what's the `tick` function?
+
+```javascript
+function tick() {
+
+  // Push a new data point onto the back.
+  data.push(random());
+
+  // Redraw the line.
+  d3.select(this)
+      .attr("d", line)
+      .attr("transform", null);
+
+  // Slide it to the left.
+  d3.active(this)
+      .attr("transform", "translate(" + x(0) + ",0)")
+    .transition()
+      .on("start", tick);
+
+  // Pop the old data point off the front.
+  data.shift();
+
+}
+```
+
+This bit of code is well commented already. Basically for each tick, which you can think of like a time step, we will:
+* Add a new value to the data array
+* Redraw the line so the new value is included
+* Slide the line to the left to make the animated look
+* Remove the oldest data point
+
+And that's a quick explanation of what we start with! If you run your http-server at this time, you should see something like [this](https://bl.ocks.org/mbostock/raw/1642989/). Time to start adding our own code and get to the exciting parts!
+
+## Adding in websockets
+The first thing we need to do is to make a connection to a websocket. A lot of this websocket code is taken from the Echo test linked above. We'll also need to refer to the GDAX documentation for how to connect to their websocket. According to the documentation, we just need to make the connection, then send a subscribe message for exactly what we want to receive messages about. Let's add some JavaScript, right after the script tags start.
+```javascript
+<script>
+// the URL to gdax's websocket feed
+var wsUri = "wss://ws-feed.gdax.com";
+
+// the subscription message to tell the websocket what kind of data we are interested in
+var subscribe = '{"type": "subscribe","product_ids": ["ETH-USD"],"channels": [{"name": "ticker","product_ids": ["ETH-USD"]}]}';
+```
+Cool! We now have two variables, one for the connection URI, and one for our subscription message, a JSON string which in this case says I want the ticker channel for Ethereum. Now how do we actually connect? This is where we will borrow some code from the echo test.
+
+Let's make a function called `initializeWebSocket()` and call it.
+```javascript
+initializeWebSocket();
+
+/**
+* Function that creates a WebSocket object and assigns handlers.
+* Adapted from https://websocket.org/echo.html
+*/
+function initializeWebSocket() {
+  websocket = new WebSocket(wsUri);
+  websocket.onopen = function(evt) { onOpen(evt) };
+  websocket.onclose = function(evt) { onClose(evt) };
+  websocket.onmessage = function(evt) { onMessage(evt) };
+  websocket.onerror = function(evt) { onError(evt) };
+}
+```
+
+The first line in our `initializeWebSocket()` function creates a websocket object and passes in the URI we just pointed to GDAX. The rest assign functions to each of the major websocket functionalities-- opening, closing, getting a message, and getting an error. We are assigning those functionalities to our own functions, so now we have to go and define those.
+
+Right under our `initializeWebSocket()` function, add:
+```javascript
+function onOpen(evt) {
+  console.log("connected to websocket!");
+  // send the subscription message
+  websocket.send(subscribe);
+}
+
+function onMessage(evt) {
+  // print out the message data
+  console.log(evt.data); 
+}
+
+function onClose(evt) {
+  console.log('disconnected');
+}
+
+function onError(evt) {
+  console.log('error: ', evt.data);
+}
+```
+And there are our four functions! We will add more to both the `onOpen()` and the `onMessage()` handlers, but for now, we'll just suffice with some log statements so that we know things are working.
+
+At this point, you can refresh your page if you left your server running, and open up the Developer Tools on your browser to see the console. You should see the message "connected to websocket!" as the first output, then you will start seeing more console outputs as messages are received. Excellent-- we've connected to the websocket! To disconnect from it, in the console, type `websocket.close()`. You should get a console output back that says 'disconnected'. It's good practice to close the websocket-- eventually we will make the code do this for us. Otherwise, your server might be stuck running even when you think you've shut it down!
