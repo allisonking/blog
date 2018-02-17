@@ -201,3 +201,24 @@ function onError(evt) {
 And there are our four functions! We will add more to both the `onOpen()` and the `onMessage()` handlers, but for now, we'll just suffice with some log statements so that we know things are working.
 
 At this point, you can refresh your page if you left your server running, and open up the Developer Tools on your browser to see the console. You should see the message "connected to websocket!" as the first output, then you will start seeing more console outputs as messages are received. Excellent-- we've connected to the websocket! To disconnect from it, in the console, type `websocket.close()`. You should get a console output back that says 'disconnected'. It's good practice to close the websocket-- eventually we will make the code do this for us. Otherwise, your server might be stuck running even when you think you've shut it down!
+
+## Adapting the D3 code
+Alright, time to start making the D3 code work for our data. Let's change this line of code:
+```javascript
+var n = 40,
+    random = d3.randomNormal(0, .2),
+    data = d3.range(n).map(random);
+```
+To:
+```javascript
+var n = 40,
+    data = [];
+```
+We'll keep `n` at 40 and get rid of any initial data by making it an empty array. This means, unlike the Spline Transition example, the graph will start off empty, and gradually fill up before starting to transition.
+
+After this, the next bit of code we are going to change is this one, where we set the y domain:
+```javascript
+var y = d3.scaleLinear()
+    .domain([-1, 1])
+    .range([height, 0]);
+```
