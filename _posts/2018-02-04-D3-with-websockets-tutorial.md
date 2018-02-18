@@ -251,4 +251,65 @@ g.append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x));
 ```
-Rather can set the x axis for wherever the value 0 would be, we will just set it equal to the height of the SVG so that the x axis is always at the bottom. 
+Rather can set the x axis for wherever the value 0 would be, we will just set it equal to the height of the SVG so that the x axis is always at the bottom. At this point, if we were to look at our web page, we would see a blank chart with only a x and y axis. The y axis should be hard coded to be near Ethereum's current prices, while the x axis is the same as in our original code, but moved to the bottom. If we open the console, then we can see messages coming in. Let's get those messages to show up on the graph now!
+
+We'll start by modifying the `onMessage()` function to:
+```javascript
+function onMessage(evt) {
+  // parse JSON response
+  var point = JSON.parse(evt.data);
+  
+  // don't do anything if this isn't a 'ticker' message with transaction data
+  if (point['type'] != 'ticker') {
+    return; 
+  }
+  
+  // add this point to the data array
+  data.push(+point['price']);
+  
+  // redraw the line when new data gets added
+  redrawLine();
+  
+  // if we have too much data, start the animation to move the line out of view
+  if (data.length > n) {
+    d3.select('.line')
+      .transition()
+      .duration(2000)
+      .ease(d3.easeLinear)
+      .on("start", tick); 
+  }
+}
+```
+Now when we receive the message, we:
+* Convert the string response from GDAX to a JSON object for easy parsing
+* Check to make sure the message we received is transaction data (since we send the subscription message, we want to ignore that and any other messages that might come in that don't have transaction data)
+* Add the point to the data array. Part of this is converting the string to a float through the use of `+`
+* Redraw the line. We still need to define this function.
+* Check to see if our data array is too large (greater than our previously defined `n`). If it is, then tell the line to start its animation, in this case, by calling the function `tick()`. This bit of code is pretty much a copy of the original code that called `tick()`. In the original code, we wanted to start transitioning right away since we started with data. But in this code, since we start empty, we don't want the transition to start until after we are overfilling.
+
+Let's make the function for redrawing the line when data gets updated. Add anywhere in your code:
+```javascript
+function redrawLine() {
+  d3.select('.line')
+    .attr('d', line)
+    .attr('transform', null);
+}
+```
+This, too, is a copy of the original code inside `tick()`, under the "Redraw the line." comment. We'll factor it out into its own function so that both our `onMessage()` and our `tick()` functions can call it. Let's look at that `tick()` function now, and change it to:
+```javascript
+function tick() {
+  // Redraw the Line.
+  redrawLine();
+
+  // Slide it to the left.
+  d3.active(this)
+      .attr("transform", "translate(" + x(0) + ",0)")
+    .transition()
+      .on("start", tick);
+
+  // Pop the old data point off the front.
+  data.shift();
+
+}
+```
+We got rid of pushing data into the data array since our `onMessage()` function does that, and we changed the bit of code that redrew the line to be a function. Other than that, the `tick()` function is the same for now.
