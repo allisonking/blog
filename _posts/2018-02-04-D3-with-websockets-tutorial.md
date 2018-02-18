@@ -222,3 +222,33 @@ var y = d3.scaleLinear()
     .domain([-1, 1])
     .range([height, 0]);
 ```
+Many wallets would cry if the value of Ethereum were between -1 and 1, so we are going to have to change that to something more accurate for Ethereum. We will make this dynamic later, but for current testing, let's change it to the current price of Ethereum, plus or minus 5. For example, when first writing this code, this domain was enough for me to see the graph show up:
+
+In order to figure out what that domain should be, take a look at the console output for when you first start getting transaction listings. Look for the 'price' attribute, then add and subtract 5 to get your range. For example, at the time of this writing, my console outputs:
+```javascript
+{"type":"ticker","sequence":2616782160,"product_id":"ETH-USD","price":"943.69000000","open_24h":"963.01000000","volume_24h":"100157.36096518","low_24h":"943.69000000","high_24h":"982.99000000","volume_30d":"6546933.68083798","best_bid":"943.41","best_ask":"943.69","side":"buy","time":"2018-02-18T20:05:42.919000Z","trade_id":29401592,"last_size":"1.79250000"}
+```
+Since the price here is listed as 943.69, my code would be:
+```javascript
+var y = d3.scaleLinear()
+    .domain([938, 948])
+    .range([height, 0]);
+```
+
+This may not catch all of the points you see, but it should be good enough to see a line getting drawn soon.
+
+Finally, let's change this line that sets where the x axis is:
+```javascript
+g.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + y(0) + ")")
+    .call(d3.axisBottom(x));
+```
+To:
+```javascript
+g.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+```
+Rather can set the x axis for wherever the value 0 would be, we will just set it equal to the height of the SVG so that the x axis is always at the bottom. 
