@@ -256,6 +256,9 @@ Rather can set the x axis for wherever the value 0 would be, we will just set it
 We'll start by modifying the `onMessage()` function to:
 ```javascript
 function onMessage(evt) {
+  // print out the message data
+  console.log(evt.data); 
+  
   // parse JSON response
   var point = JSON.parse(evt.data);
   
@@ -312,4 +315,4 @@ function tick() {
 
 }
 ```
-We got rid of pushing data into the data array since our `onMessage()` function does that, and we changed the bit of code that redrew the line to be a function. Other than that, the `tick()` function is the same for now.
+We got rid of pushing data into the data array since our `onMessage()` function does that, and we changed the bit of code that redrew the line to be a function. Other than that, the `tick()` function is the same for now. Let's see what our page looks like now!
