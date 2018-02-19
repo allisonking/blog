@@ -342,3 +342,10 @@ When you refresh, you should still see a blank chart, with just the axes. Your c
 
 You should now see the graph begin to draw itself across the screen in real time! If you keep waiting, once the `data` array gets more than 40 values, the graph will start transitioning, just like in the Spline Transition example, by scrolling off the screen. 
 
+And that's the basic idea for integrating websockets with D3! There are still some things that could be changed, for example:
+* If data does not come in quickly enough, the animation will win out and we will be left with a blank graph again
+* Could use some text to tell the user what is happening
+* It'd be nice to automatically close the websocket after a certain amount of time
+* Hard coded y domains. No one likes hard coded values!
+  * Related: because domain is hard coded, values can go off the graph
+
