@@ -426,3 +426,18 @@ function onMessage(evt) {
 ```
 
 Now if you refresh your page, you should see the message about waiting for a transaction up until the graph starts being drawn. Then, you'll see the real title of the graph, as well as the beginning of your line graph.
+
+### Automatically close the websocket
+Let's say we want the code to close the websocket after monitoring the market for five minutes. I did this in order to host the code on bl.ocks without it constantly being connected to the GDAX servers. After calling the `initializeWebsocket()` function, add to your code:
+
+```javascript
+// automatically close the web socket after five minutes
+setTimeout(function(){
+  websocket.close();
+  d3.select('#info')
+    .text("Websocket automatically disconnected after five minutes.");
+}, 5*60*1000);
+```
+This will also tell the user that the websocket was automatically disconnected. 
+
+### Automatically adjust y domain
