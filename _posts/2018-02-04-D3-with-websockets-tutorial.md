@@ -284,13 +284,34 @@ function onMessage(evt) {
 }
 ```
 Now when we receive the message, we:
+* Print to the console the message we got. We'll keep this around for debugging.
 * Convert the string response from GDAX to a JSON object for easy parsing
 * Check to make sure the message we received is transaction data (since we send the subscription message, we want to ignore that and any other messages that might come in that don't have transaction data)
 * Add the point to the data array. Part of this is converting the string to a float through the use of `+`
 * Redraw the line. We still need to define this function.
 * Check to see if our data array is too large (greater than our previously defined `n`). If it is, then tell the line to start its animation, in this case, by calling the function `tick()`. This bit of code is pretty much a copy of the original code that called `tick()`. In the original code, we wanted to start transitioning right away since we started with data. But in this code, since we start empty, we don't want the transition to start until after we are overfilling.
 
-Let's make the function for redrawing the line when data gets updated. Add anywhere in your code:
+Because we told our line to start moving when we have more than `n` points, we don't need that bit of code that starts it off anymore. In this bit of code:
+```javascript
+g.append("g")
+    .attr("clip-path", "url(#clip)")
+  .append("path")
+    .datum(data)
+    .attr("class", "line")
+  .transition()
+    .duration(500)
+    .ease(d3.easeLinear)
+    .on("start", tick);
+```
+Remove everything from `.transition()` on so that it looks like:
+```javascript
+g.append("g")
+    .attr("clip-path", "url(#clip)")
+  .append("path")
+    .datum(data)
+    .attr("class", "line")
+```
+Now let's make the function for redrawing the line when data gets updated. Add anywhere in your code:
 ```javascript
 function redrawLine() {
   d3.select('.line')
@@ -316,3 +337,8 @@ function tick() {
 }
 ```
 We got rid of pushing data into the data array since our `onMessage()` function does that, and we changed the bit of code that redrew the line to be a function. Other than that, the `tick()` function is the same for now. Let's see what our page looks like now!
+
+When you refresh, you should still see a blank chart, with just the axes. Your console should log that the websocket connection was made, and then it's just a matter of waiting for points to come in. Because our x scale was set to start at 1, and it takes two points to make a line, we actually won't see a line until there are at least 3 points inside our `data` array. You can type `data` into the console to see how many values are in there. You may also need to make sure that the values in `data` are still within that range we hard coded in for our y scale earlier. 
+
+You should now see the graph begin to draw itself across the screen in real time! If you keep waiting, once the `data` array gets more than 40 values, the graph will start transitioning, just like in the Spline Transition example, by scrolling off the screen. 
+
