@@ -349,3 +349,80 @@ And that's the basic idea for integrating websockets with D3! There are still so
 * Hard coded y domains. No one likes hard coded values!
   * Related: because domain is hard coded, values can go off the graph
 
+## Enhancements
+### Avoiding the blank graph
+This problem comes because the graph starts animating moving out of the graph and popping data off as a time step. If this time step happens to be faster than the rate that data is coming in, you can end up with a blank graph. You could get rid of animation all together and simply have the `tick()` function called each time data comes in, but then you lose the sliding animation. I personally like it, so to counter this problem, I add to the beginning of the `tick()` function:
+```javascript
+function tick() {
+  // Don't tick if we are short on data points
+  if (data.length < n-2) {
+   	return; 
+  }
+  
+  // Redraw the Line
+  ...
+}
+```
+This just returns from the `tick()` function if we don't have enough data. You can compare `data.length` to anything less than `n`, depending on how you want your graph to look. Using `n-2` always makes the graph look full since that's our domain, but you could have it at `n/2` for instance, if you want the graph to stop sliding when the are only 20 transactions in the `data` array (this will make the graph fill up, then slide over to halfway along the x axis, then stop sliding until the graph is full again, then start sliding again).
+
+### Adding text for the user
+Because it may take a while for there to be enough transactions to start drawing the graph, we want to keep the user up to date on what is happening so they aren't just looking at a blank graph. We'll add a paragraph to our HTML where we can put text for the user to read.
+
+At the beginning of the code, change:
+```html
+</style>
+<svg width="960" height="500"></svg>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+```
+to add the paragraph element:
+
+```html
+</style>
+<p id="info"> </p>
+<svg width="960" height="500"></svg>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+```
+Great, now we have somewhere to write out text to. Let's start by modifying the `onOpen()` function. Instead of using the console log, we will write text to the `p` element we just made:
+
+```javascript
+function onOpen(evt) {
+  d3.select('#info')
+    .text('Connected to the websocket! Waiting for a transaction...');
+  // send the subscription message
+  websocket.send(subscribe);
+}
+```
+
+Now we want to change the text when we do get a transaction. Once again, as explained above, we won't actually be able to graph anything until we have at least 3 points in our `data` array. So we need to add a `count` variable that counts how many points we have seen so that we can alter our text. 
+
+At the top of the JavaScript, after defining the subscription message, add:
+
+```javascript
+var count = 0;
+```
+
+Then, at the top of our `onMessage()` function, add:
+```javascript
+function onMessage(evt) {
+  count++;
+  // parse JSON response
+  ...
+  // don't do anything if this isn't a 'ticker' message with transaction data
+  ...
+  
+  // add this point to the data array
+  ...
+  
+  if (count > 2) {
+    d3.select(#info)
+      .text("Real time visualization of Ethereum prices");
+  }
+  
+  // redraw the line when new data gets added
+  ...
+}
+```
+
+Now if you refresh your page, you should see the message about waiting for a transaction up until the graph starts being drawn. Then, you'll see the real title of the graph, as well as the beginning of your line graph.
