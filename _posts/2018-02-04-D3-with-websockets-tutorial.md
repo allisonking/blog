@@ -418,7 +418,7 @@ function onMessage(evt) {
   ...
   
   // check for enough transactions
-  if (count > 2) {
+  if (count > 3) {
     d3.select(#info)
       .text("Real time visualization of Ethereum prices");
   }
@@ -491,7 +491,7 @@ function onMessage(evt) {
   if (!firstMessageReceived) {
     firstMessageReceived = true;
     center = +point['price'];
-    drawAxes(center-sigma, center+sigma);
+    drawYAxis(center-sigma, center+sigma);
   }
   
   // check for enough transactions
@@ -500,37 +500,46 @@ function onMessage(evt) {
   // code to expand the y domain if the data goes out of the current bounds
   if (+point['price'] > center+sigma) {
     sigma+= +point['price'] - (center+sigma) + buffer;
-    drawAxes(center-sigma, center+sigma);
+    drawYAxis(center-sigma, center+sigma);
   } else if (+point['price'] < center-sigma) {
     sigma+= (center-sigma) - +point['price'] + buffer;
-    drawAxes(center-sigma, center+sigma);
+    drawYAxis(center-sigma, center+sigma);
   }
   
   // redraw the line when new data gets added
   ...
 }
 ```
-Two chunks of code were added in this section. The first chunk sets the variable `center` to the value of the first transaction. Then it calls a yet to be defined function called `drawAxes()` which takes a low and a high value, in this case, `center` plus or minus `sigma`.
+Two chunks of code were added in this section. The first chunk sets the variable `center` to the value of the first transaction. Then it calls a yet to be defined function called `drawYAxis()` which takes a low and a high value, in this case, `center` plus or minus `sigma`.
 
-The next chunk of code is to see if our y domain needs to expand in the case that we get new transactions that are outside our sigma range. So we check to see if the new data point is above or below our range, and if it is, then we expand sigma by the difference plus the buffer. Then call the `drawAxes()` function on this new sigma.
+The next chunk of code is to see if our y domain needs to expand in the case that we get new transactions that are outside our sigma range. So we check to see if the new data point is above or below our range, and if it is, then we expand sigma by the difference plus the buffer. Then call the `drawYAxis()` function on this new sigma.
 
-Time to define this `drawAxes()` function! Anywhere in your JavaScript, add:
+Time to define this `drawYAxis()` function! Anywhere in your JavaScript, add:
 
 ```javascript
 /**
 * Function to draw the axes
 */
-function drawAxes(low, high) {
+function drawYAxis(low, high) {
  // set the y domain
  y.domain([low, high])
-
- // put the x axis at the bottom of the chart
- d3.select('.axis--x')
-   .attr("transform", "translate(0," + height + ")")
-   .call(d3.axisBottom(x));
 
  // set y axis
  d3.select('.axis--y')
    .call(d3.axisLeft(y));
 }
 ```
+
+With this new function, we can get rid of the bit of code that originaly called the axis. Change:
+```javascript
+g.append("g")
+    .attr("class", "axis axis--y")
+    .call(d3.axisLeft(y));
+```
+to just:
+```javascript
+g.append("g")
+ .attr("class", "axis axis--y")
+```
+
+And that's it! Refresh the page, and watch your y axis adjust to incoming transactions!
