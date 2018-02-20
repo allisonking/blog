@@ -1,5 +1,7 @@
 ---
-published: false
+published: true
+layout: post
+title: Real time visualizations with D3
 ---
 ## Real time visualizations with D3
 
