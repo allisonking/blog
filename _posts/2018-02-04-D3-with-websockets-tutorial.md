@@ -389,7 +389,7 @@ Great, now we have somewhere to write out text to. Let's start by modifying the 
 ```javascript
 function onOpen(evt) {
   d3.select('#info')
-    .text('Connected to the websocket! Waiting for a transaction...');
+    .text('Connected to the websocket! Waiting for transactions...');
   // send the subscription message
   websocket.send(subscribe);
 }
@@ -406,7 +406,9 @@ var count = 0;
 Then, at the top of our `onMessage()` function, add:
 ```javascript
 function onMessage(evt) {
+  // increment counter
   count++;
+  
   // parse JSON response
   ...
   // don't do anything if this isn't a 'ticker' message with transaction data
@@ -415,6 +417,7 @@ function onMessage(evt) {
   // add this point to the data array
   ...
   
+  // check for enough transactions
   if (count > 2) {
     d3.select(#info)
       .text("Real time visualization of Ethereum prices");
@@ -441,3 +444,93 @@ setTimeout(function(){
 This will also tell the user that the websocket was automatically disconnected. 
 
 ### Automatically adjust y domain
+Alright, it's high time we got rid of those hard coded values! First, we'll delete that line. Change:
+```javascript
+var y = d3.scaleLinear()
+    .domain([938, 948])
+    .range([height, 0]);
+```
+to:
+```javascript
+var y = d3.scaleLinear()
+    .range([height, 0]);
+```
+Now we need a way to set the domain of the y scale. We won't know what our domain should be until our first messages comes in. So let's add another variable to the beginning of our code called `firstMessageReceived`, and set it equal to `false`. To determine our y domain, we will use this first message as our `center` point. Then, we will simply expand the y domain plus or minus `sigma`. Lastly, we will also want a `buffer` variable so that our line doesn't end up right at the edge of our graph.
+
+```javascript
+// the URL to gdax's websocket feed
+...
+// the subscription message to tell the websocket what kind of data we are interested in
+...
+var firstMessageReceived = false;
+// keep track of the 'center' point for the y axis
+var center;
+// how much data we want to display around the center point
+var sigma = 0.5;
+// buffer for y axis
+var buffer = 0.1;
+
+// initialize web socket
+...
+```
+We are going to make our `onMessage()` function do the hard work.
+
+```javascript
+function onMessage(evt) {
+  // increment counter
+  ...
+  // parse JSON response
+  ...
+  // don't do anything if this isn't a 'ticker' message with transaction data
+  ...
+  
+  // add this point to the data array
+  ...
+  
+  // record when the first message is received so we can draw an initial y axis
+  if (!firstMessageReceived) {
+    firstMessageReceived = true;
+    center = +point['price'];
+    drawAxes(center-sigma, center+sigma);
+  }
+  
+  // check for enough transactions
+  ...
+  
+  // code to expand the y domain if the data goes out of the current bounds
+  if (+point['price'] > center+sigma) {
+    sigma+= +point['price'] - (center+sigma) + buffer;
+    drawAxes(center-sigma, center+sigma);
+  } else if (+point['price'] < center-sigma) {
+    sigma+= (center-sigma) - +point['price'] + buffer;
+    drawAxes(center-sigma, center+sigma);
+  }
+  
+  // redraw the line when new data gets added
+  ...
+}
+```
+Two chunks of code were added in this section. The first chunk sets the variable `center` to the value of the first transaction. Then it calls a yet to be defined function called `drawAxes()` which takes a low and a high value, in this case, `center` plus or minus `sigma`.
+
+The next chunk of code is to see if our y domain needs to expand in the case that we get new transactions that are outside our sigma range. So we check to see if the new data point is above or below our range, and if it is, then we expand sigma by the difference plus the buffer. Then call the `drawAxes()` function on this new sigma.
+
+Time to define this `drawAxes()` function! Anywhere in your JavaScript, add:
+
+```javascript
+/**
+* Function to draw the axes
+*/
+function drawAxes(low, high) {
+ // set the y domain
+ y.domain([low, high])
+
+ // put the x axis at the bottom of the chart
+ d3.select('.axis--x')
+   .attr("transform", "translate(0," + height + ")")
+   .call(d3.axisBottom(x));
+
+ // set y axis
+ d3.select('.axis--y')
+   .call(d3.axisLeft(y));
+}
+```
