@@ -418,7 +418,7 @@ function onMessage(evt) {
   ...
   
   // check for enough transactions
-  if (count > 3) {
+  if (count > 2) {
     d3.select(#info)
       .text("Real time visualization of Ethereum prices");
   }
@@ -543,3 +543,6 @@ g.append("g")
 ```
 
 And that's it! Refresh the page, and watch your y axis adjust to incoming transactions!
+
+## Conclusion
+This is a quick example for how you can use D3 with websockets in order to make real time visualizations. I chose GDAX since they have an easily accessible public websocket API, but you could imagine rolling your own websocket server to serve up data that is more relevant to your project. Have fun!
