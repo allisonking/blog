@@ -3,6 +3,10 @@ published: true
 layout: post
 title: Introducing Wikigraphs
 ---
+**Update (1/24/2018):** This is now deployed on [Heroku!](https://wikigraphs.herokuapp.com/)
+
+------------
+
 For the past few weeks, I have been working on a project that I am currently calling Wikigraphs. What in the world is that, you ask? Well, thanks for asking! If I had to summarize it, I'd say it is a framework that allows for community driven data as input into data driven graphs, thereby allowing for transparent data sources.
 
 Let's break that down. 
@@ -33,21 +37,21 @@ What does it mean to be an Asian American author? That's not an easy question to
 
 ### First, a graph
 I decided to make a graph that showed the number of reviews a given author has gotten from the NYT, as well as the ability to see a timeline of when these reviews were published. 
-![graph example](https://github.com/allisonking/wiki-graphs/raw/readme/readme-imgs/shift_data.gif)
+![graph example](https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/shift_data.gif)
 
 There's some additional functionality as well-- you can hover on points to see the book that was reviewed, who reviewed it, and clicking on the circle redirects you to the actual review. This data was gathered by first compiling a list of names, then querying the NYT API for the data, which was stored as a JSON and read in by D3. It's easy to stop here, with a reasonable looking graph with a good amount of interactivity, but the data is incomplete. 
 
 ### Next, user input
 The pipeline so far looks like this:
-![first pipeline](https://github.com/allisonking/wiki-graphs/raw/readme/readme-imgs/pipeline_1.png)
+![first pipeline](https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/pipeline_1.png)
 
 What we want though, is something more like this:
-![second pipelines](https://github.com/allisonking/wiki-graphs/raw/readme/readme-imgs/pipeline_2.png)
+![second pipelines](https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/pipeline_2.png)
 
 So what if we could let people reading the graph alter the underlying data if they see something missing or incorrect? To trust unknown people to gather data and do so correctly may seem risky, but we have seen that it can succeed in Wikipedia. 
 
 In order to accommodate data changes, I added a database and server side code (in the form of MongoDB and Flask since they are both minimal and quick to implement, with MongoDB not needing a database schema and Flask being a microframework). To the front end, I added the ability to query the NYT API dynamically given a user input, as well as the ability to remove an author.
-![second pipelines](https://github.com/allisonking/wiki-graphs/raw/readme/readme-imgs/add_delete.gif)
+![second pipelines](https://raw.githubusercontent.com/allisonking/wiki-graphs/master/readme-imgs/add_delete.gif)
 
 With the database in place, all user modifications are now saved and logged.
 
